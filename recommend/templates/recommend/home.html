@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Recommendation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Roboto', Arial, sans-serif;
+            background: #141414;
+            color: #fff;
+        }
+
+        .container {
+            background: rgba(20, 20, 20, 0.98);
+            padding: 0;
+            width: 100vw;
+            min-height: 100vh;
+            overflow-y: auto; /* ✅ Allow vertical scroll */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start; /* Changed from center to top-align */
+            text-align: center;
+            box-sizing: border-box;
+            padding-bottom: 2rem;
+        }
+
+        h1 {
+            color: #e50914;
+            font-size: 2.2rem;
+            font-weight: 900;
+            letter-spacing: 2px;
+            margin: 2rem 0 1.5rem 0;
+            text-shadow: 0 2px 12px #000a;
+        }
+
+        form {
+            margin-bottom: 2rem;
+            width: 90%;
+            max-width: 500px;
+        }
+
+        label {
+            font-weight: 700;
+            color: #fff;
+            font-size: 1.1rem;
+        }
+
+        input[type="text"] {
+            padding: 0.7rem 1.2rem;
+            border: none;
+            border-radius: 6px;
+            margin: 0.7rem 0;
+            width: 100%;
+            font-size: 1.1rem;
+            background: #232323;
+            color: #fff;
+            box-shadow: 0 2px 8px #0002;
+        }
+
+        input[type="text"]:focus {
+            outline: 2px solid #e50914;
+        }
+
+        button {
+            background: #e50914;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 0.7rem 2.2rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.2s;
+            box-shadow: 0 2px 8px #0003;
+        }
+
+        button:hover {
+            background: #b0060f;
+            transform: scale(1.05);
+        }
+
+        .results {
+            margin-top: 2.2rem;
+            text-align: left;
+            width: 90%;
+            max-width: 1100px;
+        }
+
+        .results h2 {
+            color: #fff;
+            font-size: 1.25rem;
+            margin-bottom: 1.2rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .poster-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2.2rem;
+            justify-content: center;
+            margin-top: 1.2rem;
+        }
+
+        .poster-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 160px;
+            height: auto;
+            background: #232323;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px #0005;
+            padding: 0.7rem 0.5rem 1rem 0.5rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .poster-card:hover {
+            transform: scale(1.08) translateY(-8px);
+            box-shadow: 0 8px 32px #e5091440, 0 2px 12px #0008;
+            z-index: 2;
+        }
+
+        .poster-card img {
+            width: 140px;
+            height: 210px;
+            object-fit: cover;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px #0006;
+            margin-bottom: 0.7rem;
+            background: #222;
+        }
+
+        .poster-card .movie-title {
+            font-size: 1.01rem;
+            color: #fff;
+            font-weight: 600;
+            text-align: center;
+            margin-top: 0.2rem;
+            text-shadow: 0 2px 8px #000a;
+        }
+
+        .poster-card .no-poster {
+            width: 140px;
+            height: 210px;
+            background: #444;
+            border-radius: 8px;
+            margin-bottom: 0.7rem;
+        }
+
+        .error {
+            color: #e50914;
+            margin-top: 1.5rem;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Movie Recommendation</h1>
+        <form method="post" action="{% url 'recommend_movie' %}">
+            {% csrf_token %}
+            <label for="movie">Enter a movie name:</label><br>
+            <input type="text" id="movie" name="movie" placeholder="e.g. Inception" list="movie-suggestions" autocomplete="off" required><br>
+            <datalist id="movie-suggestions">
+                {% for title in movie_titles %}
+                    <option value="{{ title }}">
+                {% endfor %}
+            </datalist>
+            <button type="submit">Recommend</button>
+        </form>
+
+
+        {% if recommendations %}
+        <div class="results">
+            <h2>Recommended Movies:</h2>
+            <div class="poster-row">
+                {% for rec in recommendations %}
+                    <div class="poster-card">
+                        {% if rec.poster %}
+                            <img src="{{ rec.poster }}" alt="{{ rec.title }} poster">
+                        {% else %}
+                            <div class="no-poster"></div>
+                        {% endif %}
+                        <span class="movie-title">{{ rec.title }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% elif home_posters %}
+        <div class="results">
+            <h2>Popular Movies</h2>
+            <div class="poster-row">
+                {% for rec in home_posters %}
+                    <div class="poster-card">
+                        {% if rec.poster %}
+                            <img src="{{ rec.poster }}" alt="{{ rec.title }} poster">
+                        {% else %}
+                            <div class="no-poster"></div>
+                        {% endif %}
+                        <span class="movie-title">{{ rec.title }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if error %}
+        <div class="error">{{ error }}</div>
+        {% endif %}
+    </div>
+</body>
+</html>

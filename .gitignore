@@ -1,0 +1,11 @@
+# Ignore model and data files
+movie_list.pkl
+similarity.pkl
+recommend/posters.json
+*.pkl
+*.json
+# Ignore Django/misc
+__pycache__/
+db.sqlite3
+*.pyc
+.env
